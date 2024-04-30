@@ -1,0 +1,173 @@
+{
+    "swagger": "2.0",
+    "info": {
+      "title": "InvestLink API",
+      "version": "1.0",
+      "description": "API for managing stocks in InvestLink"
+    },
+    "paths": {
+      "/stocks": {
+        "get": {
+          "summary": "Get all stocks",
+          "responses": {
+            "200": {
+              "description": "Successful operation"
+            }
+          }
+        },
+        "post": {
+          "summary": "Create a new stock",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "companyid": {"type": "integer"},
+                  "companyname": {"type": "string"},
+                  "ticker": {"type": "string"},
+                  "price": {"type": "number"},
+                  "p_l": {"type": "number"},
+                  "p_vp": {"type": "number"},
+                  "p_ebit": {"type": "number"},
+                  "p_ativo": {"type": "number"},
+                  "ev_ebit": {"type": "number"},
+                  "margembruta": {"type": "number"},
+                  "margemebit": {"type": "number"},
+                  "margemliquida": {"type": "number"},
+                  "p_sr": {"type": "number"},
+                  "p_capitalgiro": {"type": "number"},
+                  "p_ativocirculante": {"type": "number"},
+                  "giroativos": {"type": "number"},
+                  "roe": {"type": "number"},
+                  "roa": {"type": "number"},
+                  "roic": {"type": "number"},
+                  "dividaliquidapatrimonioliquido": {"type": "number"},
+                  "dividaliquidaebit": {"type": "number"},
+                  "pl_ativo": {"type": "number"},
+                  "passivo_ativo": {"type": "number"},
+                  "liquidezcorrente": {"type": "number"},
+                  "peg_ratio": {"type": "number"},
+                  "receitas_cagr5": {"type": "number"},
+                  "vpa": {"type": "number"},
+                  "lpa": {"type": "number"},
+                  "valormercado": {"type": "number"},
+                  "segmentid": {"type": "integer"},
+                  "sectorid": {"type": "integer"},
+                  "subsectorid": {"type": "integer"},
+                  "subsectorname": {"type": "string"},
+                  "segmentname": {"type": "string"},
+                  "sectorname": {"type": "string"}
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Stock added successfully"
+            }
+          }
+        }
+      },
+      "/stock/{ticker}": {
+        "get": {
+          "summary": "Get details of a stock",
+          "parameters": [
+            {
+              "name": "ticker",
+              "in": "path",
+              "description": "Ticker symbol of the stock",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful operation"
+            }
+          }
+        },
+        "put": {
+          "summary": "Edit an existing stock",
+          "parameters": [
+            {
+              "name": "ticker",
+              "in": "path",
+              "description": "Ticker symbol of the stock",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                    "companyid": {"type": "integer"},
+                    "companyname": {"type": "string"},
+                    "ticker": {"type": "string"},
+                    "price": {"type": "number"},
+                    "p_l": {"type": "number"},
+                    "p_vp": {"type": "number"},
+                    "p_ebit": {"type": "number"},
+                    "p_ativo": {"type": "number"},
+                    "ev_ebit": {"type": "number"},
+                    "margembruta": {"type": "number"},
+                    "margemebit": {"type": "number"},
+                    "margemliquida": {"type": "number"},
+                    "p_sr": {"type": "number"},
+                    "p_capitalgiro": {"type": "number"},
+                    "p_ativocirculante": {"type": "number"},
+                    "giroativos": {"type": "number"},
+                    "roe": {"type": "number"},
+                    "roa": {"type": "number"},
+                    "roic": {"type": "number"},
+                    "dividaliquidapatrimonioliquido": {"type": "number"},
+                    "dividaliquidaebit": {"type": "number"},
+                    "pl_ativo": {"type": "number"},
+                    "passivo_ativo": {"type": "number"},
+                    "liquidezcorrente": {"type": "number"},
+                    "peg_ratio": {"type": "number"},
+                    "receitas_cagr5": {"type": "number"},
+                    "vpa": {"type": "number"},
+                    "lpa": {"type": "number"},
+                    "valormercado": {"type": "number"},
+                    "segmentid": {"type": "integer"},
+                    "sectorid": {"type": "integer"},
+                    "subsectorid": {"type": "integer"},
+                    "subsectorname": {"type": "string"},
+                    "segmentname": {"type": "string"},
+                    "sectorname": {"type": "string"}
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Stock edited successfully"
+            }
+          }
+        },
+        "delete": {
+          "summary": "Delete an existing stock",
+          "parameters": [
+            {
+              "name": "ticker",
+              "in": "path",
+              "description": "Ticker symbol of the stock",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Stock deleted successfully"
+            }
+          }
+        }
+      }
+    }
+  }

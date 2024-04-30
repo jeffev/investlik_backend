@@ -1,3 +1,7 @@
+from flask import jsonify
+from flask_swagger import swagger
+from flask_swagger_ui import get_swaggerui_blueprint
+
 from utils import setup_routes
 from config import app, db
 
@@ -6,6 +10,18 @@ with app.app_context():
     db.create_all()
 
 setup_routes(app)
+
+# Configuração do Swagger
+SWAGGER_URL = '/swagger'
+API_URL = '/static/swagger.json'
+swaggerui_blueprint = get_swaggerui_blueprint(
+    SWAGGER_URL,
+    API_URL,
+    config={
+        'app_name': "InvestLink"
+    }
+)
+app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
 if __name__ == '__main__':
     app.run(debug=True)

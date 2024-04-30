@@ -3,19 +3,26 @@ from config import db
 from models.stock import Stock
 
 def list_stocks_json():
+    """Retorna a lista de todas as ações."""
     all_stocks = Stock.query.all()
     stocks_json = [stock.to_json() for stock in all_stocks]
     return jsonify(stocks_json)
 
-def view_stock_json(id):
-    stock = Stock.query.get(id)
+def view_stock_json(ticker):
+    """Retorna os detalhes de uma ação específica."""
+    stock = Stock.query.get(ticker)
     if stock is None:
         return jsonify({'message': 'Stock not found'}), 404
     return jsonify(stock.to_json())
 
 def new_stock_json():
+    """Adiciona uma nova ação."""
     try:
         stock_data = request.get_json()
+        existing_stock = Stock.query.filter_by(ticker=stock_data['ticker']).first()
+        if existing_stock:
+            return jsonify({'message': 'Stock already exists'}), 400
+        
         new_stock = Stock(
             companyid=stock_data['companyid'],
             companyname=stock_data['companyname'],
@@ -60,15 +67,15 @@ def new_stock_json():
         print(f"Error adding stock: {e}")
         return jsonify({'message': 'Error adding stock'}), 500
 
-def edit_stock_json(id):
-    stock = Stock.query.get(id)
+def edit_stock_json(ticker):
+    """Edita uma ação existente."""
+    stock = Stock.query.get(ticker)
     if stock is None:
         return jsonify({'message': 'Stock not found'}), 404
     try:
         stock_data = request.get_json()
         stock.companyid=stock_data['companyid'],
         stock.companyname=stock_data['companyname'],
-        stock.ticker=stock_data['ticker'],
         stock.price=float(stock_data['price']),
         stock.p_l=float(stock_data['p_l']),
         stock.p_vp=float(stock_data['p_vp']),
@@ -107,8 +114,9 @@ def edit_stock_json(id):
         print(f"Error editing stock: {e}")
         return jsonify({'message': 'Error editing stock'}), 500
 
-def delete_stock_json(id):
-    stock = Stock.query.get(id)
+def delete_stock_json(ticker):
+    """Deleta uma ação existente."""
+    stock = Stock.query.get(ticker)
     if stock is None:
         return jsonify({'message': 'Stock not found'}), 404
     try:

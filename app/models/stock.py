@@ -3,10 +3,9 @@ from config import db
 class Stock(db.Model):
     __tablename__ = 'stocks'
 
-    id = db.Column(db.Integer, primary_key=True)
+    ticker = db.Column(db.String(10), primary_key=True)
     companyid = db.Column(db.String(80))
     companyname = db.Column(db.String(255))
-    ticker = db.Column(db.String(10))
     price = db.Column(db.Float)
     p_l = db.Column(db.Float)
     dy = db.Column(db.Float)
@@ -50,10 +49,9 @@ class Stock(db.Model):
 
     def to_json(self):
         return {
-            'id': self.id,
+            'ticker': self.ticker,
             'companyid': self.companyid,
             'companyname': self.companyname,
-            'ticker': self.ticker,
             'price': self.price,
             'p_l': self.p_l,
             'dy': self.dy,
