@@ -1,17 +1,14 @@
-from flask import jsonify
-from flask_swagger import swagger
 from flask_swagger_ui import get_swaggerui_blueprint
 
 from utils import setup_routes
 from config import app, db
 
-# Cria todas as tabelas
 with app.app_context():
     db.create_all()
 
 setup_routes(app)
 
-# Configuração do Swagger
+# Swagger configuration
 SWAGGER_URL = '/swagger'
 API_URL = '/static/swagger.json'
 swaggerui_blueprint = get_swaggerui_blueprint(
