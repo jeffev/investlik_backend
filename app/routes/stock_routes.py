@@ -1,11 +1,11 @@
-from flask import jsonify, request
+from flask import request
 from services.stock_services import list_stocks, view_stock, new_stock, edit_stock, delete_stock, update_all_stocks
 
 def list_stocks_json():
     return list_stocks()
 
 def view_stock_json(ticker):
-    stock = view_stock(ticker)
+    stock = view_stock(ticker.upper())
     if stock is None:
         return {'message': 'Stock not found'}, 404
     return stock
@@ -21,14 +21,14 @@ def new_stock_json():
 def edit_stock_json(ticker):
     try:
         stock_data = request.get_json()
-        return edit_stock(ticker, stock_data)
+        return edit_stock(ticker.upper(), stock_data)
     except Exception as e:
         print(f"Error editing stock: {e}")
         return {'message': 'Error editing stock'}, 500
 
 def delete_stock_json(ticker):
     try:
-        return delete_stock(ticker)
+        return delete_stock(ticker.upper())
     except Exception as e:
         print(f"Error deleting stock: {e}")
         return {'message': 'Error deleting stock'}, 500
