@@ -5,6 +5,12 @@
       "version": "1.0",
       "description": "API for managing stocks in InvestLink"
     },
+    "tags": [
+        {
+          "name": "Stocks",
+          "description": "Endpoints for managing stocks"
+        }
+    ],
     "paths": {
       "/stocks": {
         "get": {
@@ -13,7 +19,8 @@
             "200": {
               "description": "Successful operation"
             }
-          }
+          },
+          "tags": ["Stocks"]
         },
         "post": {
           "summary": "Create a new stock",
@@ -68,7 +75,8 @@
             "200": {
               "description": "Stock added successfully"
             }
-          }
+          },
+          "tags": ["Stocks"]
         }
       },
       "/stock/{ticker}": {
@@ -87,7 +95,8 @@
             "200": {
               "description": "Successful operation"
             }
-          }
+          },
+          "tags": ["Stocks"]
         },
         "put": {
           "summary": "Edit an existing stock",
@@ -149,7 +158,8 @@
             "200": {
               "description": "Stock edited successfully"
             }
-          }
+          },
+          "tags": ["Stocks"]
         },
         "delete": {
           "summary": "Delete an existing stock",
@@ -166,7 +176,8 @@
             "200": {
               "description": "Stock deleted successfully"
             }
-          }
+          },
+          "tags": ["Stocks"]
         }
       }
     }
