@@ -1,8 +1,6 @@
 # InvestLink Backend
 
-Welcome to the LinkInvest API! This project serves as the backend for LinkInvest, a website designed to help investors make informed decisions by providing easy and practical access to information. With this API, you can manage stocks and users, accessing and updating data quickly and efficiently.
-
-Feel free to explore the endpoints and integrate this API into your own projects to enhance the investment experience for your users. If you have any questions or feedback, please don't hesitate to reach out. Happy investing!
+Welcome to the LinkInvest API! This project serves as the backend for LinkInvest, a website designed to help investors make informed decisions by providing easy and practical access to information.
 
 ## Installation
 
