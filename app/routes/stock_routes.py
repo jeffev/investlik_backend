@@ -1,24 +1,18 @@
 from flask import jsonify, request
-from app import app, db
-from models import Stock
+from config import db
+from models.stock import Stock
 
-# Route to view the list of stocks (JSON)
-@app.route('/stocks', methods=['GET'])
 def list_stocks_json():
     all_stocks = Stock.query.all()
     stocks_json = [stock.to_json() for stock in all_stocks]
     return jsonify(stocks_json)
 
-# Route to view the details of a specific stock (JSON)
-@app.route('/stock/<int:id>', methods=['GET'])
 def view_stock_json(id):
     stock = Stock.query.get(id)
     if stock is None:
         return jsonify({'message': 'Stock not found'}), 404
     return jsonify(stock.to_json())
 
-# Route to add a new stock (JSON)
-@app.route('/stocks', methods=['POST'])
 def new_stock_json():
     try:
         stock_data = request.get_json()
@@ -66,8 +60,6 @@ def new_stock_json():
         print(f"Error adding stock: {e}")
         return jsonify({'message': 'Error adding stock'}), 500
 
-# Route to edit a stock (JSON)
-@app.route('/stock/<int:id>', methods=['PUT'])
 def edit_stock_json(id):
     stock = Stock.query.get(id)
     if stock is None:
@@ -86,8 +78,6 @@ def edit_stock_json(id):
         print(f"Error editing stock: {e}")
         return jsonify({'message': 'Error editing stock'}), 500
 
-# Route to delete a stock (JSON)
-@app.route('/stock/<int:id>', methods=['DELETE'])
 def delete_stock_json(id):
     stock = Stock.query.get(id)
     if stock is None:

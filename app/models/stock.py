@@ -41,42 +41,50 @@ class Stock(db.Model):
     segmentname = db.Column(db.String(255))
     sectorname = db.Column(db.String(255))
 
-    def __init__(self, data):
-        self.companyid = data.get('companyid')
-        self.companyname = data.get('companyname')
-        self.ticker = data.get('ticker')
-        self.price = data.get('price')
-        self.p_l = data.get('p_l')
-        self.p_vp = data.get('p_vp')
-        self.p_ebit = data.get('p_ebit')
-        self.p_ativo = data.get('p_ativo')
-        self.ev_ebit = data.get('ev_ebit')
-        self.margembruta = data.get('margembruta')
-        self.margemebit = data.get('margemebit')
-        self.margemliquida = data.get('margemliquida')
-        self.p_sr = data.get('p_sr')
-        self.p_capitalgiro = data.get('p_capitalgiro')
-        self.p_ativocirculante = data.get('p_ativocirculante')
-        self.giroativos = data.get('giroativos')
-        self.roe = data.get('roe')
-        self.roa = data.get('roa')
-        self.roic = data.get('roic')
-        self.dividaliquidapatrimonioliquido = data.get('dividaliquidapatrimonioliquido')
-        self.dividaliquidaebit = data.get('dividaliquidaebit')
-        self.pl_ativo = data.get('pl_ativo')
-        self.passivo_ativo = data.get('passivo_ativo')
-        self.liquidezcorrente = data.get('liquidezcorrente')
-        self.peg_ratio = data.get('peg_ratio')
-        self.receitas_cagr5 = data.get('receitas_cagr5')
-        self.vpa = data.get('vpa')
-        self.lpa = data.get('lpa')
-        self.valormercado = data.get('valormercado')
-        self.segmentid = data.get('segmentid')
-        self.sectorid = data.get('sectorid')
-        self.subsectorid = data.get('subsectorid')
-        self.subsectorname = data.get('subsectorname')
-        self.segmentname = data.get('segmentname')
-        self.sectorname = data.get('sectorname')
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
     def __repr__(self):
         return f"<Stock(companyname={self.companyname}, ticker={self.ticker}, price={self.price})>"
+
+    def to_json(self):
+        return {
+            'id': self.id,
+            'companyid': self.companyid,
+            'companyname': self.companyname,
+            'ticker': self.ticker,
+            'price': self.price,
+            'p_l': self.p_l,
+            'dy': self.dy,
+            'p_vp': self.p_vp,
+            'p_ebit': self.p_ebit,
+            'p_ativo': self.p_ativo,
+            'ev_ebit': self.ev_ebit,
+            'margembruta': self.margembruta,
+            'margemebit': self.margemebit,
+            'margemliquida': self.margemliquida,
+            'p_sr': self.p_sr,
+            'p_capitalgiro': self.p_capitalgiro,
+            'p_ativocirculante': self.p_ativocirculante,
+            'giroativos': self.giroativos,
+            'roe': self.roe,
+            'roa': self.roa,
+            'roic': self.roic,
+            'dividaliquidapatrimonioliquido': self.dividaliquidapatrimonioliquido,
+            'dividaliquidaebit': self.dividaliquidaebit,
+            'pl_ativo': self.pl_ativo,
+            'passivo_ativo': self.passivo_ativo,
+            'liquidezcorrente': self.liquidezcorrente,
+            'peg_ratio': self.peg_ratio,
+            'receitas_cagr5': self.receitas_cagr5,
+            'vpa': self.vpa,
+            'lpa': self.lpa,
+            'valormercado': self.valormercado,
+            'segmentid': self.segmentid,
+            'sectorid': self.sectorid,
+            'subsectorid': self.subsectorid,
+            'subsectorname': self.subsectorname,
+            'segmentname': self.segmentname,
+            'sectorname': self.sectorname
+        }
