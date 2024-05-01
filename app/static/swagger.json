@@ -1,37 +1,124 @@
 {
-    "swagger": "2.0",
-    "info": {
-      "title": "InvestLink API",
-      "version": "1.0",
-      "description": "API for managing stocks in InvestLink"
+  "swagger": "2.0",
+  "info": {
+    "title": "InvestLink API",
+    "version": "1.0",
+    "description": "API for managing stocks and users in InvestLink"
+  },
+  "tags": [
+    {
+      "name": "Stocks",
+      "description": "Endpoints for managing stocks"
     },
-    "tags": [
-        {
-          "name": "Stocks",
-          "description": "Endpoints for managing stocks"
-        }
-    ],
-    "paths": {
-      "/stocks": {
-        "get": {
-          "summary": "Get all stocks",
-          "responses": {
-            "200": {
-              "description": "Successful operation"
-            }
-          },
-          "tags": ["Stocks"]
+    {
+      "name": "Users",
+      "description": "Endpoints for managing users"
+    }
+  ],
+  "paths": {
+    "/stocks": {
+      "get": {
+        "summary": "Get all stocks",
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          }
         },
-        "post": {
-          "summary": "Create a new stock",
-          "parameters": [
-            {
-              "name": "body",
-              "in": "body",
-              "required": true,
-              "schema": {
-                "type": "object",
-                "properties": {
+        "tags": ["Stocks"]
+      },
+      "post": {
+        "summary": "Create a new stock",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "companyid": {"type": "integer"},
+                "companyname": {"type": "string"},
+                "ticker": {"type": "string"},
+                "price": {"type": "number"},
+                "p_l": {"type": "number"},
+                "p_vp": {"type": "number"},
+                "p_ebit": {"type": "number"},
+                "p_ativo": {"type": "number"},
+                "ev_ebit": {"type": "number"},
+                "margembruta": {"type": "number"},
+                "margemebit": {"type": "number"},
+                "margemliquida": {"type": "number"},
+                "p_sr": {"type": "number"},
+                "p_capitalgiro": {"type": "number"},
+                "p_ativocirculante": {"type": "number"},
+                "giroativos": {"type": "number"},
+                "roe": {"type": "number"},
+                "roa": {"type": "number"},
+                "roic": {"type": "number"},
+                "dividaliquidapatrimonioliquido": {"type": "number"},
+                "dividaliquidaebit": {"type": "number"},
+                "pl_ativo": {"type": "number"},
+                "passivo_ativo": {"type": "number"},
+                "liquidezcorrente": {"type": "number"},
+                "peg_ratio": {"type": "number"},
+                "receitas_cagr5": {"type": "number"},
+                "vpa": {"type": "number"},
+                "lpa": {"type": "number"},
+                "valormercado": {"type": "number"},
+                "segmentid": {"type": "integer"},
+                "sectorid": {"type": "integer"},
+                "subsectorid": {"type": "integer"},
+                "subsectorname": {"type": "string"},
+                "segmentname": {"type": "string"},
+                "sectorname": {"type": "string"}
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stock added successfully"
+          }
+        },
+        "tags": ["Stocks"]
+      }
+    },
+    "/stock/{ticker}": {
+      "get": {
+        "summary": "Get details of a stock",
+        "parameters": [
+          {
+            "name": "ticker",
+            "in": "path",
+            "description": "Ticker symbol of the stock",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          }
+        },
+        "tags": ["Stocks"]
+      },
+      "put": {
+        "summary": "Edit an existing stock",
+        "parameters": [
+          {
+            "name": "ticker",
+            "in": "path",
+            "description": "Ticker symbol of the stock",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
                   "companyid": {"type": "integer"},
                   "companyname": {"type": "string"},
                   "ticker": {"type": "string"},
@@ -67,118 +154,142 @@
                   "subsectorname": {"type": "string"},
                   "segmentname": {"type": "string"},
                   "sectorname": {"type": "string"}
-                }
               }
             }
-          ],
-          "responses": {
-            "200": {
-              "description": "Stock added successfully"
-            }
-          },
-          "tags": ["Stocks"]
-        }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stock edited successfully"
+          }
+        },
+        "tags": ["Stocks"]
       },
-      "/stock/{ticker}": {
-        "get": {
-          "summary": "Get details of a stock",
-          "parameters": [
-            {
-              "name": "ticker",
-              "in": "path",
-              "description": "Ticker symbol of the stock",
-              "required": true,
-              "type": "string"
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "Successful operation"
-            }
-          },
-          "tags": ["Stocks"]
+      "delete": {
+        "summary": "Delete an existing stock",
+        "parameters": [
+          {
+            "name": "ticker",
+            "in": "path",
+            "description": "Ticker symbol of the stock",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stock deleted successfully"
+          }
         },
-        "put": {
-          "summary": "Edit an existing stock",
-          "parameters": [
-            {
-              "name": "ticker",
-              "in": "path",
-              "description": "Ticker symbol of the stock",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "body",
-              "in": "body",
-              "required": true,
-              "schema": {
-                "type": "object",
-                "properties": {
-                    "companyid": {"type": "integer"},
-                    "companyname": {"type": "string"},
-                    "ticker": {"type": "string"},
-                    "price": {"type": "number"},
-                    "p_l": {"type": "number"},
-                    "p_vp": {"type": "number"},
-                    "p_ebit": {"type": "number"},
-                    "p_ativo": {"type": "number"},
-                    "ev_ebit": {"type": "number"},
-                    "margembruta": {"type": "number"},
-                    "margemebit": {"type": "number"},
-                    "margemliquida": {"type": "number"},
-                    "p_sr": {"type": "number"},
-                    "p_capitalgiro": {"type": "number"},
-                    "p_ativocirculante": {"type": "number"},
-                    "giroativos": {"type": "number"},
-                    "roe": {"type": "number"},
-                    "roa": {"type": "number"},
-                    "roic": {"type": "number"},
-                    "dividaliquidapatrimonioliquido": {"type": "number"},
-                    "dividaliquidaebit": {"type": "number"},
-                    "pl_ativo": {"type": "number"},
-                    "passivo_ativo": {"type": "number"},
-                    "liquidezcorrente": {"type": "number"},
-                    "peg_ratio": {"type": "number"},
-                    "receitas_cagr5": {"type": "number"},
-                    "vpa": {"type": "number"},
-                    "lpa": {"type": "number"},
-                    "valormercado": {"type": "number"},
-                    "segmentid": {"type": "integer"},
-                    "sectorid": {"type": "integer"},
-                    "subsectorid": {"type": "integer"},
-                    "subsectorname": {"type": "string"},
-                    "segmentname": {"type": "string"},
-                    "sectorname": {"type": "string"}
-                }
+        "tags": ["Stocks"]
+      }
+    },
+    "/users": {
+      "get": {
+        "summary": "Get all users",
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          }
+        },
+        "tags": ["Users"]
+      },
+      "post": {
+        "summary": "Create a new user",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "user_name": {"type": "string"},
+                "name": {"type": "string"},
+                "email": {"type": "string"},
+                "profile": {"type": "string"},
+                "password": {"type": "string"}
               }
             }
-          ],
-          "responses": {
-            "200": {
-              "description": "Stock edited successfully"
-            }
-          },
-          "tags": ["Stocks"]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User added successfully"
+          }
         },
-        "delete": {
-          "summary": "Delete an existing stock",
-          "parameters": [
-            {
-              "name": "ticker",
-              "in": "path",
-              "description": "Ticker symbol of the stock",
-              "required": true,
-              "type": "string"
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "Stock deleted successfully"
-            }
+        "tags": ["Users"]
+      }
+    },
+    "/user/{user_id}": {
+      "get": {
+        "summary": "Get details of a user",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "description": "ID of the user",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          }
+        },
+        "tags": ["Users"]
+      },
+      "put": {
+        "summary": "Edit an existing user",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "description": "ID of the user",
+            "required": true,
+            "type": "integer"
           },
-          "tags": ["Stocks"]
-        }
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {"type": "string"},
+                "email": {"type": "string"},
+                "profile": {"type": "string"},
+                "password": {"type": "string"}
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User edited successfully"
+          }
+        },
+        "tags": ["Users"]
+      },
+      "delete": {
+        "summary": "Delete an existing user",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "description": "ID of the user",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deleted successfully"
+          }
+        },
+        "tags": ["Users"]
       }
     }
   }
+}
