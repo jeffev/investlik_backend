@@ -15,6 +15,20 @@
       "description": "Endpoints for managing users"
     }
   ],
+  "securityDefinitions": {
+    "JWTAuth": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header",
+      "description": "Bearer token for authentication. Please type in 'Bearer' followed by a space and then the token."
+
+    }
+  },
+  "security": [
+    {
+      "JWTAuth": []
+    }
+  ],
   "paths": {
     "/stocks": {
       "get": {
@@ -290,6 +304,53 @@
         },
         "tags": ["Users"]
       }
-    }
+    },
+    "/user/login": {
+      "post": {
+        "summary": "User login",
+        "description": "Endpoint to authenticate a user and get a JWT token",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "User credentials",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "user_name": {
+                  "type": "string",
+                  "example": "user123"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "password123"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "access_token": {
+                  "type": "string",
+                  "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - invalid credentials"
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    }    
   }
 }
