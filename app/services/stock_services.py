@@ -16,43 +16,33 @@ def view_stock(ticker):
     return jsonify(stock.to_json())
 
 def new_stock(stock_data):
-    try:
-        existing_stock = Stock.query.filter_by(ticker=stock_data['ticker']).first()
-        if existing_stock:
-            return jsonify({'message': 'Stock already exists'}), 400
+    existing_stock = Stock.query.filter_by(ticker=stock_data['ticker']).first()
+    if existing_stock:
+        return jsonify({'message': 'Stock already exists'}), 400
 
-        new_stock = Stock(**stock_data)
-        db.session.add(new_stock)
-        db.session.commit()
-        return jsonify({'message': 'Stock added successfully'}), 201
-    except Exception as e:
-        print(f"Error adding stock: {e}")
-        return jsonify({'message': 'Error adding stock'}), 500
+    new_stock = Stock(**stock_data)
+    db.session.add(new_stock)
+    db.session.commit()
+    return jsonify({'message': 'Stock added successfully'}), 201
 
 def edit_stock(ticker, stock_data):
     stock = Stock.query.get(ticker)
     if stock is None:
         return jsonify({'message': 'Stock not found'}), 404
-    try:
-        for key, value in stock_data.items():
-            setattr(stock, key, value)
-        db.session.commit()
-        return jsonify({'message': 'Stock edited successfully'}), 200
-    except Exception as e:
-        print(f"Error editing stock: {e}")
-        return jsonify({'message': 'Error editing stock'}), 500
+    
+    for key, value in stock_data.items():
+        setattr(stock, key, value)
+    db.session.commit()
+    return jsonify({'message': 'Stock edited successfully'}), 200
 
 def delete_stock(ticker):
     stock = Stock.query.get(ticker)
     if stock is None:
         return jsonify({'message': 'Stock not found'}), 404
-    try:
-        db.session.delete(stock)
-        db.session.commit()
-        return jsonify({'message': 'Stock deleted successfully'}), 200
-    except Exception as e:
-        print(f"Error deleting stock: {e}")
-        return jsonify({'message': 'Error deleting stock'}), 500
+    
+    db.session.delete(stock)
+    db.session.commit()
+    return jsonify({'message': 'Stock deleted successfully'}), 200
 
 def get_all_stocks_from_statusinvest():
     url = "https://statusinvest.com.br/category/advancedsearchresultpaginated"

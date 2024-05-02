@@ -2,14 +2,19 @@ from flask import request
 from services.stock_services import list_stocks, view_stock, new_stock, edit_stock, delete_stock, update_all_stocks
 
 def list_stocks_json():
-    return list_stocks()
+    try:
+        return list_stocks()
+    except Exception as e:
+        print(f"Error listing all stocks: {e}")
+        return {'message': 'Error listing all stocks'}, 500
 
 def view_stock_json(ticker):
-    stock = view_stock(ticker.upper())
-    if stock is None:
-        return {'message': 'Stock not found'}, 404
-    return stock
-
+    try:
+        return view_stock(ticker.upper())
+    except Exception as e:
+        print(f"Error viewing stock: {e}")
+        return {'message': 'Error viewing stock'}, 500
+    
 def new_stock_json():
     try:
         stock_data = request.get_json()

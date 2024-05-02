@@ -5,10 +5,11 @@ def list_users_json():
     return list_users()
 
 def view_user_json(user_id):
-    user = view_user(user_id)
-    if user is None:
-        return {'message': 'User not found'}, 404
-    return user
+    try:
+        return view_user(user_id)
+    except Exception as e:
+        print(f"Error viewing user: {e}")
+        return {'message': 'Error viewing user'}, 500
 
 def new_user_json():
     try:
