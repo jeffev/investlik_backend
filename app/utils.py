@@ -11,7 +11,6 @@ def protected_route(view_func):
     def decorated_view(*args, **kwargs):
         current_user_id = get_jwt_identity()
 
-        # Verifica se o identificador do usuário foi obtido
         if current_user_id is None:
             return jsonify({'message': 'Invalid token'}), 401
 
