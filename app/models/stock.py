@@ -1,3 +1,5 @@
+import math
+
 from config import db
 
 class Stock(db.Model):
@@ -39,13 +41,29 @@ class Stock(db.Model):
     subsectorname = db.Column(db.String(255))
     segmentname = db.Column(db.String(255))
     sectorname = db.Column(db.String(255))
+    graham_formula = db.Column(db.Float)
+    discount_to_graham = db.Column(db.Float)
 
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
 
     def __repr__(self):
-        return f"<Stock(companyname={self.companyname}, ticker={self.ticker}, price={self.price})>"
+        return f"<Stock(companyname={self.companyname}, ticker={self.ticker}, price={self.price}, graham={self.graham_formula}, dcto={self.discount_to_graham})>"
+
+    def get_graham_formula(self):
+        """
+        Calculate the Graham Formula: Intrinsic Value = √ (22.5 x LPA x VPA), where LPA is Earnings Per Share and VPA is Book Value Per Share.
+        """
+        formula = math.sqrt(22.5 * self.lpa * self.vpa) if self.lpa and self.vpa else None
+        return round(formula, 2) if formula is not None else None
+
+    def get_discount_to_graham(self):
+        """
+        Calculate the percentage discount to the Graham Formula: Discount = ((Market Value - Graham Formula) / Market Value) * 100
+        """
+        discount = ((self.price - self.get_graham_formula()) / self.price) * 100 if self.price and self.get_graham_formula() else None
+        return round(discount, 2) if discount is not None else None
 
     def to_json(self):
         return {
@@ -84,5 +102,7 @@ class Stock(db.Model):
             'subsectorid': self.subsectorid,
             'subsectorname': self.subsectorname,
             'segmentname': self.segmentname,
-            'sectorname': self.sectorname
+            'sectorname': self.sectorname,
+            'graham_formula': self.graham_formula,
+            'discount_to_graham': self.discount_to_graham
         }

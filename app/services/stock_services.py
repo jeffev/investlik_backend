@@ -26,6 +26,10 @@ def new_stock(stock_data):
             return jsonify({'message': 'Stock already exists'}), 400
 
         new_stock = Stock(**stock_data)
+
+        new_stock.graham_formula = new_stock.get_graham_formula()
+        new_stock.discount_to_graham = new_stock.get_discount_to_graham()
+
         db.session.add(new_stock)
         db.session.commit()
         return jsonify({'message': 'Stock added successfully'}), 201

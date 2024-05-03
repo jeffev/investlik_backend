@@ -1,9 +1,12 @@
+import bcrypt
+from datetime import timedelta
 from flask import jsonify
 from flask_jwt_extended import create_access_token
-import bcrypt
 
 from models.user import User
 from config import db
+
+expires = timedelta(hours=3)
 
 def list_users():
     try:
@@ -42,7 +45,7 @@ def new_user(user_data):
         db.session.add(new_user)
         db.session.commit()
         
-        access_token = create_access_token(identity=new_user.id)
+        access_token = create_access_token(identity=new_user.id,expires_delta=expires)
         return jsonify({'access_token': access_token}), 201
     except Exception as e:
         db.session.rollback()
@@ -89,7 +92,7 @@ def login_user(login_data):
         user = User.query.filter_by(user_name=login_data['user_name']).first()
 
         if user and bcrypt.checkpw(login_data['password'].encode('utf-8'), user.password.encode('utf-8')):
-            access_token = create_access_token(identity=user.id)
+            access_token = create_access_token(identity=user.id, expires_delta=expires)
             
             return jsonify({'access_token': access_token}), 200
         else:
