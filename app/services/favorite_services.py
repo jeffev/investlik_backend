@@ -89,3 +89,32 @@ def delete_favorite(favorite_id):
         db.session.rollback()
         print(f"Error deleting favorite: {e}")
         return jsonify({'message': 'Error deleting favorite'}), 500
+
+def add_favorite(user_id, ticker):
+    try:
+        existing_favorite = Favorite.query.filter_by(user_id=user_id, stock_ticker=ticker).first()
+        if existing_favorite:
+            return jsonify({'message': 'This stock is already favorited by this user'}), 400
+
+        new_favorite = Favorite(user_id=user_id, stock_ticker=ticker)
+        db.session.add(new_favorite)
+        db.session.commit()
+        return jsonify({'message': 'Favorite added successfully'}), 201
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error adding favorite: {e}")
+        return jsonify({'message': 'Error adding favorite'}), 500
+
+def remove_favorite(user_id, ticker):
+    try:
+        favorite = Favorite.query.filter_by(user_id=user_id, stock_ticker=ticker).first()
+        if not favorite:
+            return jsonify({'message': 'Favorite not found'}), 404
+        
+        db.session.delete(favorite)
+        db.session.commit()
+        return jsonify({'message': 'Favorite deleted successfully'}), 200
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error deleting favorite: {e}")
+        return jsonify({'message': 'Error deleting favorite'}), 500

@@ -1,7 +1,7 @@
 from flask import request
 from flask_jwt_extended import get_jwt_identity
 
-from services.favorite_services import list_favorites, view_favorite, new_favorite, edit_favorite, delete_favorite
+from services.favorite_services import list_favorites, view_favorite, new_favorite, edit_favorite, delete_favorite, add_favorite, remove_favorite
 
 def list_favorites_json():
     user_id = get_jwt_identity()
@@ -20,3 +20,11 @@ def edit_favorite_json(favorite_id):
 
 def delete_favorite_json(favorite_id):
     return delete_favorite(favorite_id)
+
+def add_favorite_stock(ticker):
+    user_id = get_jwt_identity()
+    return add_favorite(user_id, ticker)
+
+def remove_favorite_stock(ticker):
+    user_id = get_jwt_identity()
+    return remove_favorite(user_id, ticker)
