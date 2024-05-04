@@ -1,4 +1,5 @@
 from flask import request
+
 from services.stock_services import list_stocks, view_stock, new_stock, edit_stock, delete_stock, update_all_stocks
 
 def list_stocks_json():
