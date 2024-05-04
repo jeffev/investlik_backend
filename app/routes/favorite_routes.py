@@ -5,7 +5,6 @@ from services.favorite_services import list_favorites, view_favorite, new_favori
 
 def list_favorites_json():
     user_id = get_jwt_identity()
-    print(user_id)
     return list_favorites(user_id)
 
 def view_favorite_json(favorite_id):

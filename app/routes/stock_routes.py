@@ -1,9 +1,11 @@
 from flask import request
+from flask_jwt_extended import get_jwt_identity
 
 from services.stock_services import list_stocks, view_stock, new_stock, edit_stock, delete_stock, update_all_stocks
 
 def list_stocks_json():
-    return list_stocks()
+    user_id = get_jwt_identity()
+    return list_stocks(user_id)
 
 def view_stock_json(ticker):
     return view_stock(ticker.upper())

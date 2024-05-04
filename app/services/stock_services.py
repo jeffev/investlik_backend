@@ -2,12 +2,25 @@ import requests
 from flask import jsonify
 
 from models.stock import Stock
+from models.favorite import Favorite
 from config import db
 
-def list_stocks():
-    all_stocks = Stock.query.all()
-    stocks_json = [stock.to_json() for stock in all_stocks]
-    return jsonify(stocks_json)
+def list_stocks(user_id):
+    try:
+        all_stocks = Stock.query.all()
+        favorites = Favorite.query.filter_by(user_id=user_id).all()
+        
+        stocks_json = []
+        for stock in all_stocks:
+            stock_json = stock.to_json()
+            stock_json['favorita'] = any(favorite.stock_ticker == stock.ticker for favorite in favorites)
+            stocks_json.append(stock_json)
+    
+        return jsonify(stocks_json)
+    except Exception as e:
+            print(f"An error occurred: {e}")
+            return jsonify({'message': 'An error occurred, please try again later'}), 500
+
 
 def view_stock(ticker):
     try:
