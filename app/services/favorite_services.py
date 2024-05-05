@@ -50,14 +50,15 @@ def new_favorite(favorite_data):
 
 
 def edit_favorite(favorite_id, favorite_data):
+    print (favorite_data)
     try:
         user_id = favorite_data.get('user_id')
         stock_ticker = favorite_data.get('stock_ticker')
 
-        if not User.query.get(user_id):
+        if user_id is not None and not User.query.get(user_id):
             return jsonify({'message': 'User not found'}), 404
 
-        if not Stock.query.get(stock_ticker):
+        if stock_ticker is not None and not Stock.query.get(stock_ticker):
             return jsonify({'message': 'Stock not found'}), 404
 
         favorite = Favorite.query.get(favorite_id)
