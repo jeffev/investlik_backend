@@ -2,7 +2,9 @@ from flask_swagger_ui import get_swaggerui_blueprint
 from flask_cors import CORS
 
 from utils import setup_routes
-from config import app, db
+from config import create_app, db
+
+app = create_app()
 
 with app.app_context():
     db.create_all()

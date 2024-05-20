@@ -46,7 +46,15 @@ def new_user(user_data):
         db.session.commit()
         
         access_token = create_access_token(identity=new_user.id,expires_delta=expires)
-        return jsonify({'access_token': access_token}), 201
+
+        response_data = {
+            'profile': new_user.profile,
+            'name': new_user.name,
+            'user_name': new_user.user_name,
+            'access_token': access_token
+        }
+
+        return jsonify(response_data), 201
     except Exception as e:
         db.session.rollback()
         print(f"Error adding user: {e}")
@@ -92,9 +100,15 @@ def login_user(login_data):
         user = User.query.filter_by(user_name=login_data['user_name']).first()
 
         if user and bcrypt.checkpw(login_data['password'].encode('utf-8'), user.password.encode('utf-8')):
-            access_token = create_access_token(identity=user.id, expires_delta=expires)
-            
-            return jsonify({'access_token': access_token}), 200
+            access_token = create_access_token(identity=user.id,expires_delta=expires)
+
+            response_data = {
+                'profile': user.profile,
+                'name': user.name,
+                'user_name': user.user_name,
+                'access_token': access_token
+            }
+            return jsonify(response_data), 200
         else:
             return jsonify({'message': 'Invalid username or password'}), 401
     except Exception as e:

@@ -2,11 +2,13 @@ from flask import jsonify
 from functools import wraps
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
+from models.user import User
+
 from routes.stock_routes import list_stocks_json, view_stock_json, new_stock_json, edit_stock_json, delete_stock_json, update_all_stocks
 from routes.user_routes import list_users_json, view_user_json, new_user_json, edit_user_json, delete_user_json, login_user_json
 from routes.favorite_routes import list_favorites_json, view_favorite_json, new_favorite_json, edit_favorite_json, delete_favorite_json, add_favorite_stock, remove_favorite_stock
 
-def protected_route(view_func):
+def protected_route(view_func, required_profile=None):
     @wraps(view_func)
     @jwt_required()
     def decorated_view(*args, **kwargs):
@@ -15,7 +17,14 @@ def protected_route(view_func):
         if current_user_id is None:
             return jsonify({'message': 'Invalid token'}), 401
 
-        # Lógica para verificar perfil vai aqui
+        # Recupera o usuário do banco de dados
+        user = User.query.get(current_user_id)
+        if user is None:
+            return jsonify({'message': 'User not found'}), 404
+
+        # Verifica o perfil do usuário, se necessário
+        if required_profile and user.profile != required_profile:
+            return jsonify({'message': 'Unauthorized'}), 403
 
         # Chama a função da rota original
         return view_func(*args, **kwargs)
@@ -29,7 +38,7 @@ def setup_routes(app):
     app.add_url_rule('/stocks', methods=['POST'], view_func=protected_route(new_stock_json))
     app.add_url_rule('/stock/<string:ticker>', methods=['PUT'], view_func=protected_route(edit_stock_json))
     app.add_url_rule('/stock/<string:ticker>', methods=['DELETE'], view_func=protected_route(delete_stock_json))
-    app.add_url_rule('/stocks/update-stocks', methods=['PUT'], view_func=protected_route(update_all_stocks))
+    app.add_url_rule('/stocks/update-stocks', methods=['PUT'], view_func=protected_route(update_all_stocks, required_profile='ADMIN'))
 
     # User routes
     app.add_url_rule('/users', methods=['GET'], view_func=protected_route(list_users_json))
