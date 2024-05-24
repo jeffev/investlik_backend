@@ -16,6 +16,8 @@ def list_fiis(user_id):
             {**fii.to_json(), 'favorita': fii.ticker in favorites}
             for fii in all_fiis
         ]
+
+        fiis_json.sort(key=lambda x: x['favorita'], reverse=True)
         
         return jsonify(fiis_json)
     except Exception as e:
