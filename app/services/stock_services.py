@@ -1,3 +1,5 @@
+import logging
+import json
 import requests
 from flask import jsonify
 
@@ -8,18 +10,17 @@ from config import db
 def list_stocks(user_id):
     try:
         all_stocks = Stock.query.all()
-        favorites = Favorite.query.filter_by(user_id=user_id).all()
+        favorites = {fav.stock_ticker for fav in Favorite.query.filter_by(user_id=user_id).all()}
         
-        stocks_json = []
-        for stock in all_stocks:
-            stock_json = stock.to_json()
-            stock_json['favorita'] = any(favorite.stock_ticker == stock.ticker for favorite in favorites)
-            stocks_json.append(stock_json)
-    
+        stocks_json = [
+            {**stock.to_json(), 'favorita': stock.ticker in favorites}
+            for stock in all_stocks
+        ]
+        
         return jsonify(stocks_json)
     except Exception as e:
-            print(f"An error occurred: {e}")
-            return jsonify({'message': 'An error occurred, please try again later'}), 500
+        logging.error(f"An error occurred: {e}")
+        return jsonify({'message': 'An error occurred, please try again later'}), 500
 
 
 def view_stock(ticker):
@@ -29,17 +30,16 @@ def view_stock(ticker):
             return jsonify({'message': 'Stock not found'}), 404
         return jsonify(stock.to_json())
     except Exception as e:
-        print(f"An error occurred: {e}")
+        logging.error(f"An error occurred: {e}")
         return jsonify({'message': 'An error occurred, please try again later'}), 500
+
 
 def new_stock(stock_data):
     try:
-        existing_stock = Stock.query.filter_by(ticker=stock_data['ticker']).first()
-        if existing_stock:
+        if Stock.query.filter_by(ticker=stock_data['ticker']).first():
             return jsonify({'message': 'Stock already exists'}), 400
 
         new_stock = Stock(**stock_data)
-
         new_stock.graham_formula = new_stock.get_graham_formula()
         new_stock.discount_to_graham = new_stock.get_discount_to_graham()
 
@@ -48,8 +48,9 @@ def new_stock(stock_data):
         return jsonify({'message': 'Stock added successfully'}), 201
     except Exception as e:
         db.session.rollback()
-        print(f"An error occurred: {e}")
+        logging.error(f"An error occurred: {e}")
         return jsonify({'message': 'An error occurred, please try again later'}), 500
+
 
 def edit_stock(ticker, stock_data):
     try:
@@ -59,12 +60,17 @@ def edit_stock(ticker, stock_data):
 
         for key, value in stock_data.items():
             setattr(stock, key, value)
+        
+        stock.graham_formula = stock.get_graham_formula()
+        stock.discount_to_graham = stock.get_discount_to_graham()
+
         db.session.commit()
         return jsonify({'message': 'Stock edited successfully'}), 200
     except Exception as e:
         db.session.rollback()
-        print(f"An error occurred: {e}")
+        logging.error(f"An error occurred: {e}")
         return jsonify({'message': 'An error occurred, please try again later'}), 500
+
 
 def delete_stock(ticker):
     try:
@@ -77,14 +83,56 @@ def delete_stock(ticker):
         return jsonify({'message': 'Stock deleted successfully'}), 200
     except Exception as e:
         db.session.rollback()
-        print(f"An error occurred: {e}")
+        logging.error(f"An error occurred: {e}")
         return jsonify({'message': 'An error occurred, please try again later'}), 500
+
 
 def get_all_stocks_from_statusinvest():
     try:
         url = "https://statusinvest.com.br/category/advancedsearchresultpaginated"
+        search_params = {
+            "Sector": "",
+            "SubSector": "",
+            "Segment": "",
+            "my_range": "-20;100",
+            "forecast": {
+                "upsidedownside": {"Item1": None, "Item2": None},
+                "estimatesnumber": {"Item1": None, "Item2": None},
+                "revisedup": True,
+                "reviseddown": True,
+                "consensus": []
+            },
+            "dy": {"Item1": None, "Item2": None},
+            "p_l": {"Item1": None, "Item2": None},
+            "peg_ratio": {"Item1": None, "Item2": None},
+            "p_vp": {"Item1": None, "Item2": None},
+            "p_ativo": {"Item1": None, "Item2": None},
+            "margembruta": {"Item1": None, "Item2": None},
+            "margemebit": {"Item1": None, "Item2": None},
+            "margemliquida": {"Item1": None, "Item2": None},
+            "p_ebit": {"Item1": None, "Item2": None},
+            "ev_ebit": {"Item1": None, "Item2": None},
+            "dividaliquidaebit": {"Item1": None, "Item2": None},
+            "dividaliquidapatrimonioliquido": {"Item1": None, "Item2": None},
+            "p_sr": {"Item1": None, "Item2": None},
+            "p_capitalgiro": {"Item1": None, "Item2": None},
+            "p_ativocirculante": {"Item1": None, "Item2": None},
+            "roe": {"Item1": None, "Item2": None},
+            "roic": {"Item1": None, "Item2": None},
+            "roa": {"Item1": None, "Item2": None},
+            "liquidezcorrente": {"Item1": None, "Item2": None},
+            "pl_ativo": {"Item1": None, "Item2": None},
+            "passivo_ativo": {"Item1": None, "Item2": None},
+            "giroativos": {"Item1": None, "Item2": None},
+            "receitas_cagr5": {"Item1": None, "Item2": None},
+            "lucros_cagr5": {"Item1": None, "Item2": None},
+            "liquidezmediadiaria": {"Item1": None, "Item2": None},
+            "vpa": {"Item1": None, "Item2": None},
+            "lpa": {"Item1": None, "Item2": None},
+            "valormercado": {"Item1": None, "Item2": None}
+        }
         params = {
-            "search": "{\"Sector\":\"\",\"SubSector\":\"\",\"Segment\":\"\",\"my_range\":\"-20;100\",\"forecast\":{\"upsidedownside\":{\"Item1\":null,\"Item2\":null},\"estimatesnumber\":{\"Item1\":null,\"Item2\":null},\"revisedup\":true,\"reviseddown\":true,\"consensus\":[]},\"dy\":{\"Item1\":null,\"Item2\":null},\"p_l\":{\"Item1\":null,\"Item2\":null},\"peg_ratio\":{\"Item1\":null,\"Item2\":null},\"p_vp\":{\"Item1\":null,\"Item2\":null},\"p_ativo\":{\"Item1\":null,\"Item2\":null},\"margembruta\":{\"Item1\":null,\"Item2\":null},\"margemebit\":{\"Item1\":null,\"Item2\":null},\"margemliquida\":{\"Item1\":null,\"Item2\":null},\"p_ebit\":{\"Item1\":null,\"Item2\":null},\"ev_ebit\":{\"Item1\":null,\"Item2\":null},\"dividaliquidaebit\":{\"Item1\":null,\"Item2\":null},\"dividaliquidapatrimonioliquido\":{\"Item1\":null,\"Item2\":null},\"p_sr\":{\"Item1\":null,\"Item2\":null},\"p_capitalgiro\":{\"Item1\":null,\"Item2\":null},\"p_ativocirculante\":{\"Item1\":null,\"Item2\":null},\"roe\":{\"Item1\":null,\"Item2\":null},\"roic\":{\"Item1\":null,\"Item2\":null},\"roa\":{\"Item1\":null,\"Item2\":null},\"liquidezcorrente\":{\"Item1\":null,\"Item2\":null},\"pl_ativo\":{\"Item1\":null,\"Item2\":null},\"passivo_ativo\":{\"Item1\":null,\"Item2\":null},\"giroativos\":{\"Item1\":null,\"Item2\":null},\"receitas_cagr5\":{\"Item1\":null,\"Item2\":null},\"lucros_cagr5\":{\"Item1\":null,\"Item2\":null},\"liquidezmediadiaria\":{\"Item1\":null,\"Item2\":null},\"vpa\":{\"Item1\":null,\"Item2\":null},\"lpa\":{\"Item1\":null,\"Item2\":null},\"valormercado\":{\"Item1\":null,\"Item2\":null}}",
+            "search": json.dumps(search_params),
             "orderColumn": "",
             "isAsc": "",
             "page": 0,
@@ -97,32 +145,46 @@ def get_all_stocks_from_statusinvest():
 
         response = requests.get(url, params=params, headers=headers)
 
-        if response.status_code == 200:
-            try:
-                return response.json()
-            except ValueError:
-                return None
-        else:
+        if response.status_code != 200:
+            logging.error(f"HTTP error occurred: {response.status_code}")
             return None
+
+        return response.json()
     except Exception as e:
-        print(f"An error occurred: {e}")
+        logging.error(f"An error occurred: {e}")
         return None
+
 
 def update_all_stocks():
     try:
         stocks_data = get_all_stocks_from_statusinvest()
-
-        if stocks_data:
-            for stock_data in stocks_data['list']:
-                ticker = stock_data['ticker']
-                if Stock.query.filter_by(ticker=ticker).first():
-                    edit_stock(ticker, stock_data)
-                else:
-                    new_stock(stock_data)
-
-            return jsonify({'message': 'Stocks updated successfully.'}), 200
-        else:
+        if not stocks_data or 'list' not in stocks_data:
             return jsonify({'error': 'Error fetching stock data from StatusInvest.'}), 500
+        
+        cached_stocks = stocks_data['list']
+        tickers = {stock['ticker'] for stock in cached_stocks}
+
+        existing_stocks = Stock.query.filter(Stock.ticker.in_(tickers)).all()
+        existing_tickers = {stock.ticker for stock in existing_stocks}
+
+        for stock in existing_stocks:
+            stock_data = next(item for item in cached_stocks if item['ticker'] == stock.ticker)
+            for key, value in stock_data.items():
+                setattr(stock, key, value)
+            stock.graham_formula = stock.get_graham_formula()
+            stock.discount_to_graham = stock.get_discount_to_graham()
+        
+        new_stocks = [
+            Stock(**stock_data, 
+                  graham_formula=stock.get_graham_formula(), 
+                  discount_to_graham=stock.get_discount_to_graham())
+            for stock_data in cached_stocks if stock_data['ticker'] not in existing_tickers
+        ]
+
+        db.session.add_all(new_stocks)
+        db.session.commit()
+        return jsonify({'message': 'Stocks updated successfully.'}), 200
     except Exception as e:
-        print(f"An error occurred: {e}")
+        db.session.rollback()
+        logging.error(f"An error occurred: {e}")
         return jsonify({'message': 'An error occurred, please try again later'}), 500
