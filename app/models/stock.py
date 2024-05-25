@@ -55,8 +55,12 @@ class Stock(db.Model):
         """
         Calculate the Graham Formula: Intrinsic Value = √ (22.5 x LPA x VPA), where LPA is Earnings Per Share and VPA is Book Value Per Share.
         """
-        formula = math.sqrt(22.5 * self.lpa * self.vpa) if self.lpa and self.vpa else None
-        return round(formula, 2) if formula is not None else None
+        if self.lpa and self.vpa and self.lpa >= 0 and self.vpa >= 0:
+            formula = math.sqrt(22.5 * self.lpa * self.vpa)
+            return round(formula, 2)
+        else:
+            return None
+
 
     def get_discount_to_graham(self):
         """

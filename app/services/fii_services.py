@@ -128,12 +128,24 @@ def update_all_fiis():
         fiis_data = get_all_fiis_from_statusinvest()
         if not fiis_data or 'list' not in fiis_data:
             return jsonify({'error': 'Error fetching FII data from StatusInvest.'}), 500
-        
+
         cached_fiis = fiis_data['list']
         tickers = {fii['ticker'] for fii in cached_fiis}
 
         existing_fiis = Fii.query.filter(Fii.ticker.in_(tickers)).all()
         existing_tickers = {fii.ticker for fii in existing_fiis}
+
+        numeric_fields = [
+            'price', 'sectorid', 'subsectorid', 'segmentid', 'gestao',
+            'dy', 'p_vp', 'valorpatrimonialcota', 'liquidezmediadiaria',
+            'percentualcaixa', 'dividend_cagr', 'cota_cagr', 'numerocotistas',
+            'numerocotas', 'patrimonio', 'lastdividend'
+        ]
+
+        for fii_data in cached_fiis:
+            for field in numeric_fields:
+                if field not in fii_data or fii_data[field] is None:
+                    fii_data[field] = 0.0
 
         for fii in existing_fiis:
             fii_data = next(item for item in cached_fiis if item['ticker'] == fii.ticker)

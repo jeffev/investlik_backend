@@ -20,10 +20,11 @@ class Favorite(db.Model):
         return f"<Favorite(user_id={self.user_id}, stock_ticker={self.stock_ticker}, ceiling_price={self.ceiling_price}, target_price={self.target_price})>"
 
     def to_json(self):
+        stock_json = self.stock.to_json() if self.stock else None
         return {
             'id': self.id,
             'user_id': self.user_id,
-            'stock_ticker': self.stock_ticker,
+            'stock': stock_json,
             'ceiling_price': self.ceiling_price,
             'target_price': self.target_price
         }

@@ -167,6 +167,19 @@ def update_all_stocks():
         existing_stocks = Stock.query.filter(Stock.ticker.in_(tickers)).all()
         existing_tickers = {stock.ticker for stock in existing_stocks}
 
+        numeric_fields = [
+            'price', 'p_l', 'dy', 'p_vp', 'p_ebit', 'p_ativo', 'ev_ebit', 'margembruta',
+            'margemebit', 'margemliquida', 'p_sr', 'p_capitalgiro', 'p_ativocirculante',
+            'giroativos', 'roe', 'roa', 'roic', 'dividaliquidapatrimonioliquido', 
+            'dividaliquidaebit', 'pl_ativo', 'passivo_ativo', 'liquidezcorrente',
+            'peg_ratio', 'receitas_cagr5', 'vpa', 'lpa', 'valormercado'
+        ]
+
+        for stock_data in cached_stocks:
+            for field in numeric_fields:
+                if field not in stock_data or stock_data[field] is None:
+                    stock_data[field] = 0.0
+
         for stock in existing_stocks:
             stock_data = next(item for item in cached_stocks if item['ticker'] == stock.ticker)
             for key, value in stock_data.items():
