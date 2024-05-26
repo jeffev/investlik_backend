@@ -43,6 +43,10 @@ class Stock(db.Model):
     sectorname = db.Column(db.String(255))
     graham_formula = db.Column(db.Float)
     discount_to_graham = db.Column(db.Float)
+    roic_rank = db.Column(db.Integer)
+    ey_rank = db.Column(db.Integer)
+    magic_formula_rank = db.Column(db.Integer)
+
 
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
@@ -50,6 +54,14 @@ class Stock(db.Model):
 
     def __repr__(self):
         return f"<Stock(companyname={self.companyname}, ticker={self.ticker}, price={self.price}, graham={self.graham_formula}, dcto={self.discount_to_graham})>"
+
+    def get_discount_to_graham(self):
+        """
+        Calculate the percentage discount to the Graham Formula: Discount = ((Market Value - Graham Formula) / Market Value) * 100
+        """
+        graham_formula_value = self.get_graham_formula()
+        discount = ((self.price - graham_formula_value) / self.price) * 100 if self.price and graham_formula_value else 0.0
+        return round(discount, 2)
 
     def get_graham_formula(self):
         """
@@ -59,15 +71,7 @@ class Stock(db.Model):
             formula = math.sqrt(22.5 * self.lpa * self.vpa)
             return round(formula, 2)
         else:
-            return None
-
-
-    def get_discount_to_graham(self):
-        """
-        Calculate the percentage discount to the Graham Formula: Discount = ((Market Value - Graham Formula) / Market Value) * 100
-        """
-        discount = ((self.price - self.get_graham_formula()) / self.price) * 100 if self.price and self.get_graham_formula() else None
-        return round(discount, 2) if discount is not None else None
+            return 0.0
 
     def to_json(self):
         return {
@@ -108,5 +112,8 @@ class Stock(db.Model):
             'segmentname': self.segmentname,
             'sectorname': self.sectorname,
             'graham_formula': self.graham_formula,
-            'discount_to_graham': self.discount_to_graham
+            'discount_to_graham': self.discount_to_graham,
+            'roic_rank': self.roic_rank,
+            'ey_rank': self.ey_rank,
+            'magic_formula_rank': self.magic_formula_rank
         }

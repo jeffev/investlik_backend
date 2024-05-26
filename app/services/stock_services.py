@@ -155,6 +155,14 @@ def get_all_stocks_from_statusinvest():
         return None
 
 
+def calculate_ey(stock_data):
+    # Exemplo de cálculo do EY (Earnings Yield)
+    # EY = Earnings / Price
+    earnings = stock_data.get('lpa', 0)  # Utilizando LPA (Lucro por Ação)
+    price = stock_data.get('price', 0)
+    ey = earnings / price if price != 0 else 0
+    return ey
+
 def update_all_stocks():
     try:
         stocks_data = get_all_stocks_from_statusinvest()
@@ -180,23 +188,44 @@ def update_all_stocks():
                 if field not in stock_data or stock_data[field] is None:
                     stock_data[field] = 0.0
 
+        for stock_data in cached_stocks:
+            stock_data['ey'] = calculate_ey(stock_data)
+
+        roic_ranks = {stock['ticker']: rank + 1 for rank, stock in enumerate(sorted(cached_stocks, key=lambda x: x['roic'], reverse=True))}
+        ey_ranks = {stock['ticker']: rank + 1 for rank, stock in enumerate(sorted(cached_stocks, key=lambda x: x['ey'], reverse=True))}
+
+        for stock_data in cached_stocks:
+            stock_data['roic_rank'] = roic_ranks[stock_data['ticker']]
+            stock_data['ey_rank'] = ey_ranks[stock_data['ticker']]
+            stock_data['magic_formula_rank'] = stock_data['roic_rank'] + stock_data['ey_rank']
+
         for stock in existing_stocks:
             stock_data = next(item for item in cached_stocks if item['ticker'] == stock.ticker)
             for key, value in stock_data.items():
                 setattr(stock, key, value)
             stock.graham_formula = stock.get_graham_formula()
             stock.discount_to_graham = stock.get_discount_to_graham()
+            stock.roic_rank = stock_data['roic_rank']
+            stock.ey_rank = stock_data['ey_rank']
+            stock.magic_formula_rank = stock_data['magic_formula_rank']
         
         new_stocks = [
-            Stock(**stock_data, 
-                  graham_formula=stock.get_graham_formula(), 
-                  discount_to_graham=stock.get_discount_to_graham())
+            Stock(**{
+                **stock_data,
+                'graham_formula': stock_data['graham_formula'],
+                'discount_to_graham': stock_data['discount_to_graham'],
+                'roic_rank': stock_data['roic_rank'],
+                'ey_rank': stock_data['ey_rank'],
+                'magic_formula_rank': stock_data['magic_formula_rank']
+            })
             for stock_data in cached_stocks if stock_data['ticker'] not in existing_tickers
         ]
 
         db.session.add_all(new_stocks)
         db.session.commit()
-        return jsonify({'message': 'Stocks updated successfully.'}), 200
+        
+        return jsonify({'message': 'Stocks updated successfully'}), 200
+
     except Exception as e:
         db.session.rollback()
         logging.error(f"An error occurred: {e}")
