@@ -2,7 +2,6 @@ import logging
 import json
 import requests
 from flask import jsonify
-
 from models.stock import Stock
 from models.favorite import Favorite
 from config import db
@@ -26,7 +25,7 @@ def list_stocks(user_id):
 def view_stock(ticker):
     try:
         stock = Stock.query.get(ticker)
-        if stock is None:
+        if not stock:
             return jsonify({'message': 'Stock not found'}), 404
         return jsonify(stock.to_json())
     except Exception as e:
@@ -55,7 +54,7 @@ def new_stock(stock_data):
 def edit_stock(ticker, stock_data):
     try:
         stock = Stock.query.get(ticker)
-        if stock is None:
+        if not stock:
             return jsonify({'message': 'Stock not found'}), 404
 
         for key, value in stock_data.items():
@@ -75,7 +74,7 @@ def edit_stock(ticker, stock_data):
 def delete_stock(ticker):
     try:
         stock = Stock.query.get(ticker)
-        if stock is None:
+        if not stock:
             return jsonify({'message': 'Stock not found'}), 404
 
         db.session.delete(stock)
@@ -156,12 +155,11 @@ def get_all_stocks_from_statusinvest():
 
 
 def calculate_ey(stock_data):
-    # Exemplo de cálculo do EY (Earnings Yield)
-    # EY = Earnings / Price
     earnings = stock_data.get('lpa', 0)  # Utilizando LPA (Lucro por Ação)
     price = stock_data.get('price', 0)
     ey = earnings / price if price != 0 else 0
     return ey
+
 
 def update_all_stocks():
     try:
@@ -185,8 +183,7 @@ def update_all_stocks():
 
         for stock_data in cached_stocks:
             for field in numeric_fields:
-                if field not in stock_data or stock_data[field] is None:
-                    stock_data[field] = 0.0
+                stock_data[field] = stock_data.get(field, 0.0)
 
         for stock_data in cached_stocks:
             stock_data['ey'] = calculate_ey(stock_data)
@@ -195,37 +192,35 @@ def update_all_stocks():
         ey_ranks = {stock['ticker']: rank + 1 for rank, stock in enumerate(sorted(cached_stocks, key=lambda x: x['ey'], reverse=True))}
 
         for stock_data in cached_stocks:
-            stock_data['roic_rank'] = roic_ranks[stock_data['ticker']]
-            stock_data['ey_rank'] = ey_ranks[stock_data['ticker']]
-            stock_data['magic_formula_rank'] = stock_data['roic_rank'] + stock_data['ey_rank']
+            stock_data['rank_roic'] = roic_ranks[stock_data['ticker']]
+            stock_data['rank_ey'] = ey_ranks[stock_data['ticker']]
+            stock_data['rank_sum'] = stock_data['rank_roic'] + stock_data['rank_ey']
 
-        for stock in existing_stocks:
-            stock_data = next(item for item in cached_stocks if item['ticker'] == stock.ticker)
-            for key, value in stock_data.items():
-                setattr(stock, key, value)
-            stock.graham_formula = stock.get_graham_formula()
-            stock.discount_to_graham = stock.get_discount_to_graham()
-            stock.roic_rank = stock_data['roic_rank']
-            stock.ey_rank = stock_data['ey_rank']
-            stock.magic_formula_rank = stock_data['magic_formula_rank']
-        
-        new_stocks = [
-            Stock(**{
-                **stock_data,
-                'graham_formula': stock_data['graham_formula'],
-                'discount_to_graham': stock_data['discount_to_graham'],
-                'roic_rank': stock_data['roic_rank'],
-                'ey_rank': stock_data['ey_rank'],
-                'magic_formula_rank': stock_data['magic_formula_rank']
-            })
-            for stock_data in cached_stocks if stock_data['ticker'] not in existing_tickers
+        stock_objects = [
+            Stock(
+                **{field: stock_data[field] for field in numeric_fields},
+                ticker=stock_data['ticker'],
+                ey=stock_data['ey'],
+                rank_roic=stock_data['rank_roic'],
+                rank_ey=stock_data['rank_ey'],
+                rank_sum=stock_data['rank_sum']
+            ) for stock_data in cached_stocks
         ]
 
-        db.session.add_all(new_stocks)
-        db.session.commit()
-        
-        return jsonify({'message': 'Stocks updated successfully'}), 200
+        for stock in stock_objects:
+            if stock.ticker in existing_tickers:
+                existing_stock = next(s for s in existing_stocks if s.ticker == stock.ticker)
+                for field in numeric_fields:
+                    setattr(existing_stock, field, getattr(stock, field))
+                existing_stock.ey = stock.ey
+                existing_stock.rank_roic = stock.rank_roic
+                existing_stock.rank_ey = stock.rank_ey
+                existing_stock.rank_sum = stock.rank_sum
+            else:
+                db.session.add(stock)
 
+        db.session.commit()
+        return jsonify({'message': 'Stock data updated successfully'}), 200
     except Exception as e:
         db.session.rollback()
         logging.error(f"An error occurred: {e}")
