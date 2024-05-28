@@ -28,22 +28,8 @@ class Fii(db.Model):
     lastdividend = db.Column(db.Float)
 
     def __init__(self, **kwargs):
-        numeric_fields = [
-            'price', 'sectorid', 'subsectorid', 'segmentid', 'gestao', 
-            'dy', 'p_vp', 'valorpatrimonialcota', 'liquidezmediadiaria', 
-            'percentualcaixa', 'dividend_cagr', 'cota_cagr', 'numerocotistas', 
-            'numerocotas', 'patrimonio', 'lastdividend'
-        ]
-        
-        for field in numeric_fields:
-            if field in kwargs:
-                value = kwargs[field]
-                if value is None:
-                    setattr(self, field, 0.0)
-                else:
-                    setattr(self, field, value)
-            else:
-                setattr(self, field, 0.0)
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
     def __repr__(self):
         return f"<Fii(companyname={self.companyname}, ticker={self.ticker}, price={self.price})>"
