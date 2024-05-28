@@ -155,7 +155,7 @@ def get_all_stocks_from_statusinvest():
 
 
 def calculate_ey(stock_data):
-    earnings = stock_data.get('lpa', 0)  # Utilizando LPA (Lucro por Ação)
+    earnings = stock_data.get('lpa', 0)
     price = stock_data.get('price', 0)
     ey = earnings / price if price != 0 else 0
     return ey
@@ -165,7 +165,7 @@ def update_all_stocks():
         stocks_data = get_all_stocks_from_statusinvest()
         if not stocks_data or 'list' not in stocks_data:
             return jsonify({'error': 'Error fetching stock data from StatusInvest.'}), 500
-        
+
         cached_stocks = stocks_data['list']
         tickers = {stock['ticker'] for stock in cached_stocks}
 
@@ -175,52 +175,45 @@ def update_all_stocks():
         numeric_fields = [
             'price', 'p_l', 'dy', 'p_vp', 'p_ebit', 'p_ativo', 'ev_ebit', 'margembruta',
             'margemebit', 'margemliquida', 'p_sr', 'p_capitalgiro', 'p_ativocirculante',
-            'giroativos', 'roe', 'roa', 'roic', 'dividaliquidapatrimonioliquido', 
+            'giroativos', 'roe', 'roa', 'roic', 'dividaliquidapatrimonioliquido',
             'dividaliquidaebit', 'pl_ativo', 'passivo_ativo', 'liquidezcorrente',
             'peg_ratio', 'receitas_cagr5', 'vpa', 'lpa', 'valormercado'
         ]
 
         for stock_data in cached_stocks:
-            for field in numeric_fields:
-                if field not in stock_data or stock_data[field] is None:
-                    stock_data[field] = 0.0
-
-        for stock_data in cached_stocks:
             stock_data['ey'] = calculate_ey(stock_data)
+            for field in numeric_fields:
+                stock_data.setdefault(field, 0.0)
 
-        roic_ranks = {stock['ticker']: rank + 1 for rank, stock in enumerate(sorted(cached_stocks, key=lambda x: x['roic'], reverse=True))}
-        ey_ranks = {stock['ticker']: rank + 1 for rank, stock in enumerate(sorted(cached_stocks, key=lambda x: x['ey'], reverse=True))}
+        ey_ranks = {stock['ticker']: rank + 1 for rank, stock in
+                    enumerate(sorted(cached_stocks, key=lambda x: x['ey'], reverse=True))}
 
+        roic_ranks = {stock['ticker']: rank + 1 for rank, stock in
+                      enumerate(sorted(cached_stocks, key=lambda x: x['roic'], reverse=True))}
+
+        new_stocks = []
         for stock_data in cached_stocks:
             stock_data['roic_rank'] = roic_ranks[stock_data['ticker']]
             stock_data['ey_rank'] = ey_ranks[stock_data['ticker']]
             stock_data['magic_formula_rank'] = stock_data['roic_rank'] + stock_data['ey_rank']
 
-        for stock in existing_stocks:
-            stock_data = next(item for item in cached_stocks if item['ticker'] == stock.ticker)
-            for key, value in stock_data.items():
-                setattr(stock, key, value)
-            stock.graham_formula = stock.get_graham_formula()
-            stock.discount_to_graham = stock.get_discount_to_graham()
-            stock.roic_rank = stock_data['roic_rank']
-            stock.ey_rank = stock_data['ey_rank']
-            stock.magic_formula_rank = stock_data['magic_formula_rank']
-        
-        new_stocks = [
-            Stock(**{
-                **stock_data,
-                'graham_formula': stock_data['graham_formula'],
-                'discount_to_graham': stock_data['discount_to_graham'],
-                'roic_rank': stock_data['roic_rank'],
-                'ey_rank': stock_data['ey_rank'],
-                'magic_formula_rank': stock_data['magic_formula_rank']
-            })
-            for stock_data in cached_stocks if stock_data['ticker'] not in existing_tickers
-        ]
+            if stock_data['ticker'] in existing_tickers:
+                stock = next(stock for stock in existing_stocks if stock.ticker == stock_data['ticker'])
+                for key, value in stock_data.items():
+                    setattr(stock, key, value)
+                stock.graham_formula = stock.get_graham_formula()
+                stock.discount_to_graham = stock.get_discount_to_graham()
+                stock.roic_rank = stock_data['roic_rank']
+                stock.ey_rank = stock_data['ey_rank']
+                stock.magic_formula_rank = stock_data['magic_formula_rank']
+            else:
+                new_stocks.append(Stock(**{
+                    **stock_data
+                }))
 
         db.session.add_all(new_stocks)
         db.session.commit()
-        
+
         return jsonify({'message': 'Stocks updated successfully'}), 200
 
     except Exception as e:

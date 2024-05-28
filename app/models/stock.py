@@ -51,6 +51,9 @@ class Stock(db.Model):
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
+        
+        self.graham_formula = self.get_graham_formula();
+        self.discount_to_graham = self.get_discount_to_graham();
 
     def __repr__(self):
         return f"<Stock(companyname={self.companyname}, ticker={self.ticker}, price={self.price}, graham={self.graham_formula}, dcto={self.discount_to_graham})>"
