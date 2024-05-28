@@ -1,8 +1,10 @@
-import logging
 import bcrypt
+import logging
+import re
 from datetime import timedelta
 from flask import jsonify
 from flask_jwt_extended import create_access_token
+
 from models.user import User
 from config import db
 
@@ -123,7 +125,11 @@ def login_user(login_data):
         return jsonify({'message': 'Error logging in user'}), 500
 
 def validate_email(email):
-    pass
+    # Expressão regular para validar email
+    email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(email_regex, email) is not None
 
 def validate_username(user_name):
-    pass
+    # Expressão regular para validar nome de usuário (mínimo 3 caracteres, sem espaços)
+    username_regex = r'^[a-zA-Z0-9_.-]{3,}$'
+    return re.match(username_regex, user_name) is not None
